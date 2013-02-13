@@ -22,11 +22,12 @@ query = """
 SELECT zip, city.name, p.name, %s
 FROM city JOIN producer p on p.id = city.producer_id"""
 
-legend = ['zip', 'city', 'producer']
+legend = ['PLZ', 'Stadt', 'Anbieter']
 
 add_result = []
 for r_id, typ in source_rows:
-    query += '\nLEFT JOIN percent p%s ON p%s.producer_id=p.id and p%s.source_id=%s' \
+    query += '\nLEFT JOIN percent p%s ' \
+             'ON p%s.producer_id=p.id and p%s.source_id=%s' \
                                                     % (r_id, r_id, r_id, r_id)
     add_result.append('p%d.percent' % r_id)
     legend.append(typ)
@@ -43,4 +44,7 @@ with open('strom_mix.csv', 'wb') as csvfile:
 
     writer.writerow(legend)
     for row in rows:
+        rest = row[3:]
+        if [r for r in rest if r is not None]:
+            row = row[:3] + tuple(r or 0 for r in rest)
         writer.writerow(row)
